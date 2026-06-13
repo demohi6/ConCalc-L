@@ -786,15 +786,6 @@ function renderMore(){
           ${['az','ru','en'].map(l=>`<button onclick="setLang('${l}')" style="flex:1;padding:10px;border-radius:10px;border:1px solid ${lang===l?'var(--gold)':'var(--border)'};background:${lang===l?'rgba(201,170,124,.1)':'none'};color:${lang===l?'var(--gold)':'var(--text2)'};font-size:13px;font-weight:700;cursor:pointer;font-family:'Mulish',sans-serif">${l.toUpperCase()}</button>`).join('')}
         </div>
       </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:10px">
-          <i class="ph ph-${document.documentElement.getAttribute('data-theme')==='light'?'sun':'moon'}" style="font-size:20px;color:var(--gold)"></i>
-          <span style="font-size:14px;font-weight:600">${lang==='ru'?'Светлая тема':lang==='az'?'İşıqlı tema':'Light theme'}</span>
-        </div>
-        <div onclick="toggleTheme()" style="width:48px;height:28px;border-radius:14px;background:${document.documentElement.getAttribute('data-theme')==='light'?'var(--gold)':'rgba(255,255,255,.15)'};position:relative;cursor:pointer;transition:background .3s">
-          <div style="position:absolute;top:3px;${document.documentElement.getAttribute('data-theme')==='light'?'right:3px':'left:3px'};width:22px;height:22px;border-radius:50%;background:white;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:all .3s"></div>
-        </div>
-      </div>
       <button onclick="showPriceBook()" class="btn btn-secondary" style="justify-content:flex-start;gap:12px;padding:16px"><i class="ph ph-tag" style="font-size:20px"></i> ${l3('Прайс-лист материалов','Materialların qiymət cədvəli','Material price book')}<i class="ph ph-caret-right" style="font-size:16px;margin-left:auto;color:var(--text3)"></i></button>
       <button onclick="exportPDF()" class="btn btn-secondary" style="justify-content:flex-start;gap:12px;padding:16px"><i class="ph ph-file" style="font-size:20px"></i> PDF ${lang==='ru'?'Экспорт':'Export'}</button>
       <button onclick="showCalc()" class="btn btn-secondary" style="justify-content:flex-start;gap:12px;padding:16px"><i class="ph ph-calculator" style="font-size:20px"></i> ${lang==='ru'?'Калькулятор материалов':'Material calculator'}</button>

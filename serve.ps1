@@ -19,6 +19,8 @@ while ($listener.IsListening) {
             '.svg'  { 'image/svg+xml' }
             '.ico'  { 'image/x-icon' }
             '.webp' { 'image/webp' }
+            '.jpg'  { 'image/jpeg' }
+            '.jpeg' { 'image/jpeg' }
             default { 'application/octet-stream' }
         }
         $bytes = [System.IO.File]::ReadAllBytes($file)

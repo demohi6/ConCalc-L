@@ -866,7 +866,7 @@ function initStack(){
       dots.style.cssText='display:flex;justify-content:center;gap:6px;padding:8px 0 2px';
       // Создаём точки один раз, потом только обновляем
       if(dots.children.length!==M){
-        dots.innerHTML=cards.map((_,i)=>`<div data-dot="${i}" style="width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.2);transition:width .3s ease,background .3s ease"></div>`).join('');
+        dots.innerHTML=cards.map((_,i)=>`<div data-dot="${i}" style="width:6px;height:6px;border-radius:3px;background:#D6DCD8;transition:width .3s ease,background .3s ease"></div>`).join('');
       }
       updateDots(_stackIdx);
     } else if(dots){dots.style.display='none';}
@@ -999,7 +999,7 @@ function positionStack(cards,activeIdx,PEEK,CARD_H,M){
       card.style.transform='scale(1)';
       card.style.opacity='1';
       card.style.zIndex='10';
-      card.style.boxShadow='0 8px 32px rgba(0,0,0,.4)';
+      card.style.boxShadow='0 8px 28px rgba(18,48,33,.12)';
       card.classList.add('stack-active');
     } else if(depth===1){
       card.style.top='8px';
@@ -1024,7 +1024,7 @@ function updateDots(activeIdx){
   dots.querySelectorAll('[data-dot]').forEach(el=>{
     const i=parseInt(el.dataset.dot);
     el.style.width=i===activeIdx?'16px':'6px';
-    el.style.background=i===activeIdx?'var(--gold)':'rgba(255,255,255,.2)';
+    el.style.background=i===activeIdx?'var(--gold)':'#D6DCD8';
   });
 }
 function stackGoTo(idx,cards,PEEK,CARD_H,M){

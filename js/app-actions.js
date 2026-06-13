@@ -387,8 +387,8 @@ function initTabSwipe(){
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 // Инициализация: сначала показываем из localStorage, потом обновляем из IDB
 db=loadDB();
-// Применяем тему до рендера (по умолчанию — светлая)
-(function(){const t=localStorage.getItem('isapp_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();
+// ConCalc-light — всегда светлая тема (тёмной нет)
+(function(){document.documentElement.setAttribute('data-theme','light');})();
 renderDash();
 setTimeout(initCarouselDots,150);
 initTabSwipe();

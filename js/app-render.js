@@ -94,39 +94,43 @@ function renderDash(){
       const doneStages=oSt.filter(s=>s.status==='done').length;
       const budgetLeft=o.totalBudget>0?o.totalBudget-oFact:null;
       const isOverBudget=budgetLeft!==null&&budgetLeft<0;
-      return`<div class="proj-stack-card" data-idx="${i}" data-obj-id="${o.id}">
-        <div class="proj-carousel-top">
-          ${o.photo?`<div class="proj-carousel-icon" style="background:url(${o.photo}) center/cover no-repeat;font-size:0"></div>`:`<div class="proj-carousel-icon">${o.icon}</div>`}
-          <div style="flex:1;min-width:0;padding:0 14px">
-            <div class="proj-carousel-name">${tName(o)||o.name}</div>
-            <div class="proj-carousel-sub" onclick="event.stopPropagation();showStagesPage()" style="cursor:pointer">${oSt.length} ${lang==='ru'?'эт.':lang==='az'?'mərhələ':'stages'} · ${doneStages} ${lang==='ru'?'готово':lang==='az'?'hazır':'done'} <i class="ph ph-caret-right" style="font-size:9px;opacity:.5"></i></div>
-            ${oOvd>0?`<div onclick="event.stopPropagation();showOverdueModal('${o.id}')" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--red);margin-top:5px;font-weight:600;cursor:pointer"><i class="ph ph-warning"></i> ${oOvd} ${lang==='ru'?'просрочено':lang==='az'?'gecikmiş':'overdue'} <i class="ph ph-caret-right" style="font-size:9px;opacity:.6"></i></div>`:''}
+      const cover=o.photo||((o.journal||[]).slice().reverse().find(e=>e.photo)||{}).photo||'icons/cover-house.jpg';
+      const stagesLeft=Math.max(0,oSt.length-doneStages);
+      return`<div class="proj-stack-card proj-hero-card" data-idx="${i}" data-obj-id="${o.id}" style="padding:0;overflow:hidden;border:none">
+        <div style="position:relative;height:190px">
+          <img src="${cover}" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 42%;display:block">
+          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(8,20,14,.82),rgba(8,20,14,.10) 46%,rgba(8,20,14,0) 70%)"></div>
+          ${oOvd>0?`<span onclick="event.stopPropagation();showOverdueModal('${o.id}')" style="position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:5px;background:rgba(224,75,75,.96);color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;cursor:pointer"><i class="ph ph-warning" style="font-size:13px"></i> ${oOvd} ${l3('просрочено','gecikmiş','overdue')}</span>`:''}
+          <button onclick="event.stopPropagation();editObjectPrompt('${o.id}')" style="position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);border:none;color:#16201A;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px"><i class="ph ph-dots-three"></i></button>
+          <div style="position:absolute;left:15px;right:15px;bottom:13px">
+            <div style="font-family:'Unbounded',sans-serif;font-size:18px;font-weight:700;color:#fff;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${tName(o)||o.name}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:5px">
+              <div style="min-width:0;font-size:12px;color:rgba(255,255,255,.88);display:flex;align-items:center;gap:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.city?`<i class="ph ph-map-pin" style="font-size:13px;flex-shrink:0"></i> ${o.city}`:''}</div>
+              <div style="flex-shrink:0;background:rgba(255,255,255,.95);border-radius:999px;padding:6px 11px;display:flex;align-items:baseline;gap:4px"><span style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--accent-deep)">${Math.round(oPct)}%</span><span style="font-size:10.5px;color:var(--text2);font-weight:600">${l3('освоено','mənims.','done')}</span></div>
+            </div>
           </div>
-          <button onclick="event.stopPropagation();editObjectPrompt('${o.id}')" style="background:none;border:none;color:var(--text2);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;align-self:flex-start;padding:2px 0 0 4px"><i class="ph ph-dots-three"></i></button>
         </div>
-        <div style="margin:14px 0 8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">${lang==='ru'?'Выполнение':'Progress'}</div>
-            <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:${ringCol}">${Math.round(oPct)}%</div>
+        <div style="padding:14px 16px 16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+            <span onclick="event.stopPropagation();showStagesPage()" style="font-size:12px;color:var(--text2);font-weight:600;cursor:pointer">${oSt.length} ${l3('этапов','mərhələ','stages')} · ${doneStages} ${l3('готово','hazır','done')}</span>
+            <span style="font-size:12px;color:var(--text3)">${l3('осталось','qalıb','left')} ${stagesLeft}</span>
           </div>
-          <div class="expense-bar-track" style="height:8px;border-radius:4px">
+          <div class="expense-bar-track" style="height:7px;border-radius:4px;margin-bottom:15px">
             <div class="expense-bar-fill" style="width:${Math.min(oPct,100)}%;background:${ringCol};border-radius:4px"></div>
           </div>
-        </div>
-        <div class="proj-carousel-stats">
-          <div class="proj-carousel-stat" onclick="event.stopPropagation();switchTab('finance')" style="cursor:pointer">
-            <div class="proj-carousel-stat-val" style="color:var(--gold)">${fmtShort(oFact)}</div>
-            <div class="proj-carousel-stat-lbl">${l3('Расходы','Xərclər','Expenses')} <i class="ph ph-caret-right" style="font-size:8px;opacity:.4;vertical-align:middle"></i></div>
-          </div>
-          <div style="width:1px;background:var(--border)"></div>
-          <div class="proj-carousel-stat" onclick="event.stopPropagation();showBudgetDetail('${o.id}')" style="cursor:pointer">
-            <div class="proj-carousel-stat-val" style="color:${budgetLeft===null?'var(--text3)':isOverBudget?'var(--red)':'var(--text)'}">${budgetLeft===null?'—':fmtShort(budgetLeft)}</div>
-            <div class="proj-carousel-stat-lbl">${isOverBudget?l3('Перерасход','Həddindən artıq','Over budget'):l3('Остаток','Qalıq','Remaining')} <i class="ph ph-caret-right" style="font-size:8px;opacity:.4;vertical-align:middle"></i></div>
-          </div>
-          <div style="width:1px;background:var(--border)"></div>
-          <div class="proj-carousel-stat" onclick="event.stopPropagation();switchTab('finance');switchFinanceTab('debts')" style="cursor:pointer">
-            <div class="proj-carousel-stat-val" style="color:${oDebt>0?'var(--red)':'var(--text3)'}">${oDebt>0?fmtShort(oDebt):'—'}</div>
-            <div class="proj-carousel-stat-lbl" style="color:${oDebt>0?'var(--red)':'var(--text3)'}">${l3('Долги','Borclar','Debts')} <i class="ph ph-caret-right" style="font-size:8px;opacity:.4;vertical-align:middle"></i></div>
+          <div style="display:flex;justify-content:space-between">
+            <div onclick="event.stopPropagation();switchTab('finance')" style="cursor:pointer">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${l3('Расходы','Xərclər','Expenses')}</div>
+              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500">${fmtShort(oFact)}</div>
+            </div>
+            <div onclick="event.stopPropagation();showBudgetDetail('${o.id}')" style="text-align:center;cursor:pointer">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${isOverBudget?l3('Перерасход','Aşıb','Over'):l3('Остаток','Qalıq','Left')}</div>
+              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:${budgetLeft===null?'var(--text3)':isOverBudget?'var(--red)':'var(--text)'}">${budgetLeft===null?'—':fmtShort(budgetLeft)}</div>
+            </div>
+            <div onclick="event.stopPropagation();switchTab('finance');switchFinanceTab('debts')" style="text-align:right;cursor:pointer">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${l3('Долги','Borclar','Debts')}</div>
+              <div style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:${oDebt>0?'var(--red)':'var(--text3)'}">${oDebt>0?fmtShort(oDebt):'—'}</div>
+            </div>
           </div>
         </div>
       </div>`;
