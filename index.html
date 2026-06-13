@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Construct"/>
+<meta name="theme-color" content="#F4F7F5"/>
+<link rel="manifest" href="./manifest.json"/>
+<link rel="apple-touch-icon" sizes="192x192" href="./icons/icon-192.png"/>
+<link rel="apple-touch-icon" sizes="512x512" href="./icons/icon-512.png"/>
+<title>Construct</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Mulish:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="icons/phosphor.css"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)"/>
+<input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoInput(event)"/>
+<div id="app">
+  <div class="page" id="pageDash">
+    <div class="content" id="dashContent"></div>
+  </div>
+
+  <div class="page page-hidden-right" id="pageDetail">
+    <div class="detail-hero" id="detailHero"></div>
+    <div class="content" id="detailContent"></div>
+  </div>
+
+  <div class="page page-hidden-right" id="pagePos">
+    <div class="detail-hero" id="posHero"></div>
+    <div class="content" id="posContent"></div>
+  </div>
+
+  <div class="page page-tab page-hidden-right" id="pageMasters">
+    <div class="content" id="mastersContent"></div>
+  </div>
+
+  <div class="page page-tab page-hidden-right" id="pageMore">
+    <div class="content" id="moreContent"></div>
+  </div>
+
+  <div class="page page-tab page-hidden-right" id="pageFinance">
+    <div class="content" id="financeContent"></div>
+  </div>
+
+  <div class="page page-hidden-right" id="pageObjFinance">
+    <div class="content" id="objFinanceContent"></div>
+  </div>
+
+  <div class="page page-hidden-right" id="pageJournal">
+    <div class="content" id="journalContent"></div>
+  </div>
+</div>
+<div class="tab-bar" id="tabBar">
+  <div class="tab-item active" id="tab-home" onclick="switchTab('home')">
+    <i class="tab-icon ph ph-house"></i>
+    <div class="tab-label" id="tabLabelHome">Главная</div>
+  </div>
+  <div class="tab-item" id="tab-masters" onclick="switchTab('masters')">
+    <i class="tab-icon ph ph-hard-hat"></i>
+    <div class="tab-label" id="tabLabelMasters">Мастера</div>
+  </div>
+  <div class="tab-item tab-item-add" id="tabAdd" onclick="onTabAdd()">
+    <div class="tab-add-bubble"><i class="ph ph-plus"></i></div>
+  </div>
+  <div class="tab-item" id="tab-finance" onclick="switchTab('finance')">
+    <i class="tab-icon ph ph-wallet"></i>
+    <div class="tab-label" id="tabLabelFinance">Финансы</div>
+  </div>
+  <div class="tab-item" id="tab-more" onclick="switchTab('more')">
+    <i class="tab-icon ph ph-dots-three"></i>
+    <div class="tab-label" id="tabLabelMore">Ещё</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const _fbConfig={
+  apiKey:"AIzaSyBo8eIujjdIIwN2j8qUD4UyQF1zZKSJDVE",
+  authDomain:"construct-84360.firebaseapp.com",
+  projectId:"construct-84360",
+  storageBucket:"construct-84360.firebasestorage.app",
+  messagingSenderId:"356011986506",
+  appId:"1:356011986506:web:806f1015dc76c3bb7060b3"
+};
+firebase.initializeApp(_fbConfig);
+const _fbAuth=firebase.auth();
+const _fbDb=firebase.firestore();
+</script>
+<script src="js/data.js"></script>
+<script src="js/features.js"></script>
+<script src="js/finance.js"></script>
+<script src="js/tabs.js"></script>
+<script src="js/app-render.js"></script>
+<script src="js/app-actions.js"></script>
+</body>
+</html>

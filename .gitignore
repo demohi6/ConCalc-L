@@ -1,0 +1,15 @@
+Error*.txt
+*_backup.js
+*_backup.css
+index_backup.html
+backups/
+setup-network.ps1
+setup-ssh.ps1
+icons/phosphor-icons.zip
+.claude/
+
+# Capacitor / Node
+node_modules/
+www/
+android/
+ios/
