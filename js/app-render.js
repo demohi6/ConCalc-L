@@ -73,63 +73,53 @@ function renderDash(){
   const hr=new Date().getHours();
   const greet=lang==='ru'?(hr<12?'Доброе утро':hr<17?'Добрый день':'Добрый вечер'):lang==='az'?(hr<12?'Sabahınız xeyir':hr<17?'Günortanız xeyir':'Axşamınız xeyir'):(hr<12?'Good morning':hr<17?'Good afternoon':'Good evening');
   const st=stages();
+  // ── STEP 1 (золото/крем макет): только хедер + фото-герой. Секции ниже соберём по пунктам. ──
+  const o=(typeof curObj==='function'&&curObj())||db.objects[0];
+  const oSt=o.stages||[];
+  const oFact=oSt.reduce((a,s)=>(s.positions||[]).reduce((b,p)=>b+posFact(p),a),0);
+  const oSmeta=oSt.reduce((a,s)=>(s.positions||[]).reduce((b,p)=>b+posSmeta(p),a),0);
+  const oDenom=o.totalBudget>0?o.totalBudget:oSmeta;
+  const oPct=oDenom>0?Math.min(oFact/oDenom*100,100):0;
+  const oDebt=oSt.reduce((a,s)=>a+stageDebt(s),0);
+  const cover=o.photo||((o.journal||[]).slice().reverse().find(e=>e.photo)||{}).photo||'icons/cover-house.jpg';
+  const ringC=2*Math.PI*35;
   document.getElementById('dashContent').innerHTML=`
     <div class="dash-hero">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-      <div id="weatherWidget" style="display:none;align-items:center;gap:5px;background:var(--inset);border:1px solid var(--border);border-radius:20px;padding:4px 10px;cursor:pointer" onclick="loadWeather()"></div>
-    </div>
-    ${(!isStandalone&&isIOS)?`<div class="budget-banner" style="background:var(--inset-2);border-color:var(--border);padding:12px 14px;margin-bottom:12px"><div style="display:flex;align-items:center;gap:10px"><div style="font-size:24px;color:var(--gold)"><i class="ph ph-device-mobile"></i></div><div><div style="font-size:13px;font-weight:600;margin-bottom:2px">${t('install')}</div><div style="font-size:11px;color:var(--text3)">${t('installHint')}</div></div></div></div>`:''}
-    ${(!isStandalone&&!isIOS&&window._installPrompt)?`<div class="budget-banner" style="background:var(--inset-2);border-color:var(--border);padding:12px 14px;margin-bottom:12px"><div style="display:flex;align-items:center;gap:10px"><div style="flex:1"><div style="font-size:13px;font-weight:600">${t('install')}</div></div><button class="btn btn-sm" style="background:var(--accent-tint);color:var(--accent-deep);border:1px solid var(--accent-line)" onclick="installApp()">${t('installBtn')}</button></div></div>`:''}
-    <div class="proj-stack" id="projStack">
-    ${db.objects.map((o,i)=>{
-      const oSt=o.stages||[];
-      const oFact=oSt.reduce((a,s)=>(s.positions||[]).reduce((b,p)=>b+posFact(p),a),0);
-      const oSmeta=oSt.reduce((a,s)=>(s.positions||[]).reduce((b,p)=>b+posSmeta(p),a),0);
-      // Прогресс по общему бюджету (если задан) — честнее чем по смете незавершённых этапов
-      const oDenom=o.totalBudget>0?o.totalBudget:oSmeta;
-      const oPct=oDenom>0?Math.min(oFact/oDenom*100,100):0;
-      const oOvd=oSt.reduce((a,s)=>a+stageOverdueCount(s),0);
-      const oDebt=oSt.reduce((a,s)=>a+stageDebt(s),0);
-      const ringCol=oPct>=80?'var(--green)':'var(--gold)';
-      const doneStages=oSt.filter(s=>s.status==='done').length;
-      const budgetLeft=o.totalBudget>0?o.totalBudget-oFact:null;
-      const isOverBudget=budgetLeft!==null&&budgetLeft<0;
-      const cover=o.photo||((o.journal||[]).slice().reverse().find(e=>e.photo)||{}).photo||'icons/cover-house.jpg';
-      const stagesLeft=Math.max(0,oSt.length-doneStages);
-      return`<div class="proj-stack-card proj-hero-card" data-idx="${i}" data-obj-id="${o.id}" style="padding:0;overflow:hidden;border:none;height:252px">
-        <img src="${cover}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;display:block">
-        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(8,20,14,.86),rgba(8,20,14,.12) 50%,rgba(8,20,14,0) 72%)"></div>
-        ${oOvd>0?`<span onclick="event.stopPropagation();showOverdueModal('${o.id}')" style="position:absolute;top:12px;left:12px;display:inline-flex;align-items:center;gap:5px;background:rgba(224,75,75,.96);color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;cursor:pointer"><i class="ph ph-warning" style="font-size:13px"></i> ${oOvd} ${l3('просрочено','gecikmiş','overdue')}</span>`:''}
-        <button onclick="event.stopPropagation();editObjectPrompt('${o.id}')" style="position:absolute;top:11px;right:11px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);border:none;color:#16201A;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px"><i class="ph ph-dots-three"></i></button>
-        <div style="position:absolute;left:14px;right:14px;bottom:13px">
-          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:11px">
-            <div style="min-width:0">
-              <div style="font-family:'Unbounded',sans-serif;font-size:19px;font-weight:700;color:#fff;line-height:1.12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${tName(o)||o.name}</div>
-              <div onclick="event.stopPropagation();showStagesPage()" style="font-size:12px;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:4px;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer">${o.city?`<i class="ph ph-map-pin" style="font-size:13px;flex-shrink:0"></i> ${o.city} · `:''}${oSt.length} ${l3('этапов','mərhələ','stages')} · ${doneStages} ${l3('готово','hazır','done')}</div>
-            </div>
-            <div style="flex-shrink:0;background:rgba(255,255,255,.96);border-radius:999px;padding:6px 11px;display:flex;align-items:baseline;gap:4px"><span style="font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--accent-deep)">${Math.round(oPct)}%</span><span style="font-size:11px;color:var(--text2);font-weight:600">${l3('освоено','mənims.','done')}</span></div>
+      <div class="gold-topbar">
+        <div style="min-width:0">
+          <div class="gold-title">${tName(o)||o.name||'Mountain'}</div>
+          <div class="gold-location"><i class="ph ph-map-pin" style="font-size:18px;color:#777"></i> ${o.city||'Исмаиллы'} <span>•</span> ${o.style||o.kind||'Mountain Modern'}</div>
+        </div>
+        <div class="gold-actions">
+          <button class="gold-icon-btn" onclick="typeof goJournal==='function'&&goJournal()" style="position:relative;background:transparent;box-shadow:none"><i class="ph ph-bell"></i><span style="position:absolute;top:8px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--gold)"></span></button>
+          <button class="gold-icon-btn soft" onclick="editObjectPrompt('${o.id}')"><i class="ph ph-dots-three"></i></button>
+        </div>
+      </div>
+      <div class="gold-hero-card">
+        <img src="${cover}" alt="">
+        <div class="gold-hero-shade"></div>
+        <div class="gold-ring">
+          <svg width="84" height="84" viewBox="0 0 84 84">
+            <circle cx="42" cy="42" r="35" fill="none" stroke="rgba(255,255,255,.32)" stroke-width="5"/>
+            <circle cx="42" cy="42" r="35" fill="none" stroke="#DCB76E" stroke-width="5" stroke-linecap="round" stroke-dasharray="${ringC}" stroke-dashoffset="${ringC*(1-oPct/100)}" transform="rotate(-90 42 42)"/>
+            <text x="42" y="40" text-anchor="middle" fill="#fff" font-family="Unbounded,sans-serif" font-size="17" font-weight="500">${Math.round(oPct)}%</text>
+            <text x="42" y="55" text-anchor="middle" fill="rgba(255,255,255,.8)" font-family="Mulish,sans-serif" font-size="9.5" letter-spacing="1">${l3('готово','hazır','done')}</text>
+          </svg>
+        </div>
+        <div class="gold-hero-stats">
+          <div>
+            <div class="gold-hero-label">${l3('Потрачено','Xərclənib','Spent')}</div>
+            <div class="gold-hero-val">${fmtShort(oFact)}</div>
           </div>
-          <div style="display:flex;background:rgba(10,24,17,.5);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:11px 4px">
-            <div onclick="event.stopPropagation();switchTab('finance')" style="flex:1;text-align:center;cursor:pointer">
-              <div style="font-size:11px;color:rgba(255,255,255,.62);margin-bottom:3px">${l3('Расходы','Xərclər','Expenses')}</div>
-              <div style="font-family:'DM Mono',monospace;font-size:14px;color:#fff">${fmtShort(oFact)}</div>
-            </div>
-            <div onclick="event.stopPropagation();showBudgetDetail('${o.id}')" style="flex:1;text-align:center;cursor:pointer;border-left:1px solid rgba(255,255,255,.16)">
-              <div style="font-size:11px;color:rgba(255,255,255,.62);margin-bottom:3px">${isOverBudget?l3('Перерасход','Aşıb','Over'):l3('Остаток','Qalıq','Left')}</div>
-              <div style="font-family:'DM Mono',monospace;font-size:14px;color:${budgetLeft===null?'rgba(255,255,255,.5)':isOverBudget?'#FF9D9D':'#fff'}">${budgetLeft===null?'—':fmtShort(budgetLeft)}</div>
-            </div>
-            <div onclick="event.stopPropagation();switchTab('finance');switchFinanceTab('debts')" style="flex:1;text-align:center;cursor:pointer;border-left:1px solid rgba(255,255,255,.16)">
-              <div style="font-size:11px;color:rgba(255,255,255,.62);margin-bottom:3px">${l3('Долги','Borclar','Debts')}</div>
-              <div style="font-family:'DM Mono',monospace;font-size:14px;color:${oDebt>0?'#FF9D9D':'rgba(255,255,255,.45)'}">${oDebt>0?fmtShort(oDebt):'—'}</div>
-            </div>
+          <div class="gold-hero-sep"></div>
+          <div>
+            <div class="gold-hero-label">${l3('Долги','Borclar','Debts')}</div>
+            <div class="gold-hero-val" style="color:${oDebt>0?'#FF7272':'#fff'}">${fmtShort(oDebt)}</div>
           </div>
         </div>
-      </div>`;
-    }).join('')}
+      </div>
     </div>
-    <div class="proj-dots" id="projDots" style="display:none"></div>
-    </div>
-    <div class="dash-body"><div id="dashBottom"></div></div>`;
+    <div id="dashBottom"></div>`;
   renderDashBottom();
 }
 function getWeeklyData(obj,weekOffset){
@@ -726,6 +716,128 @@ function todayBlockHTML(o){
   </div>`;
 }
 // Поповер выбора типа: открыть/закрыть
+function goldStageIconHTML(stage,idx,done){
+  if(done)return'<i class="ph ph-check"></i>';
+  const name=((tName(stage)||stage.name||'')+'').toLowerCase();
+  let ic='ph-hard-hat';
+  if(name.includes('короб')||name.includes('газ')||name.includes('box'))ic='ph-package';
+  else if(name.includes('кры')||name.includes('roof'))ic='ph-house';
+  else if(name.includes('отдел')||name.includes('finish'))ic='ph-paint-brush';
+  else if(name.includes('фин')||name.includes('бас')||name.includes('pool'))ic='ph-wallet';
+  else if(idx===1)ic='ph-package';
+  else if(idx===2)ic='ph-house';
+  else if(idx===3)ic='ph-paint-brush';
+  return`<i class="ph ${ic}"></i>`;
+}
+function goldStageDate(stage){
+  const dates=(stage.positions||[]).flatMap(p=>(p.works||[]).map(w=>w.startDate||w.endDate).filter(Boolean));
+  const raw=stage.startDate||dates[0]||stage.endDate;
+  if(!raw)return l3('09 июн.','09 iyn.','Jun 09');
+  const d=new Date(raw+'T00:00:00');
+  if(isNaN(d))return raw;
+  return d.toLocaleDateString(lang==='az'?'az-AZ':lang==='en'?'en-US':'ru-RU',{day:'2-digit',month:'short'}).replace('.', '');
+}
+function goldNextStageCardHTML(o){
+  const st=o.stages||[];
+  if(!st.length)return startCardHTML(o);
+  const s=st.find(x=>x.status==='active')||st.find(x=>x.status==='idle')||st[0];
+  const idx=Math.max(0,st.indexOf(s));
+  const sm=stageSmeta(s),fc=stageFact(s);
+  const pct=sm>0?Math.min(Math.round(fc/sm*100),100):(s.status==='done'?100:0);
+  const status=s.status==='done'?l3('готов','hazır','done'):s.status==='active'?l3('идёт','gedir','active'):l3('план','plan','plan');
+  return`<div class="gold-stage-card" onclick="goDetail('${s.id}')">
+    <div class="gold-stage-kicker">${s.status==='active'?l3('Текущий этап','Cari mərhələ','Current stage'):l3('Следующий этап','Növbəti mərhələ','Next stage')}</div>
+    <div class="gold-stage-icon">${goldStageIconHTML(s,idx,false)}</div>
+    <div style="min-width:0">
+      <div class="gold-stage-name">${tName(s)||s.name}</div>
+      <div class="gold-stage-meta">${fmtShort(fc)}${sm>0?' из '+fmtShort(sm):''}</div>
+      <div class="gold-progress"><span style="width:${pct}%"></span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:13px">
+      <div style="text-align:left">
+        <div class="gold-pill">${status}</div>
+        <div class="gold-stage-date">${l3('Начало','Başlanğıc','Start')}<b>${goldStageDate(s)}</b></div>
+      </div>
+      <i class="ph ph-arrow-right gold-arrow"></i>
+    </div>
+  </div>`;
+}
+function matTotalSafe(m){return (m.qty||0)*(m.price||0);}
+function goldTodayFinanceHTML(o){
+  const td=getTodayData(o);
+  const dayStart=new Date();dayStart.setHours(0,0,0,0);
+  const allJ=(o.journal||[]).filter(e=>e.ts>=dayStart.getTime()&&!(e.meta&&e.meta.attendance)).sort((a,b)=>a.ts-b.ts);
+  const rows=[];
+  (td.todayPayments||[]).forEach(p=>rows.push({ts:Date.now(),type:'payment',text:l3('Выплата: ','Ödəniş: ','Payment: ')+fmtShort(p.amount)+(p.contractor?' → '+p.contractor:'')}));
+  (td.todayMats||[]).forEach(m=>rows.push({ts:Date.now()+1,type:'mat',text:m.name+(m.qty?' '+m.qty+' '+(m.unit||''):'')}));
+  allJ.forEach(e=>rows.push({ts:e.ts,type:e.type,text:e.text}));
+  rows.sort((a,b)=>a.ts-b.ts);
+  const fallback=[
+    {time:'09:30',type:'payment',text:l3('Выплата: 300 ₼ → Лена','Ödəniş: 300 ₼ → Lena','Payment: 300 ₼ → Lena')},
+    {time:'10:15',type:'mat',text:l3('Газоблок 2куба','Qazoblok 2 kub','Gas block 2 m³')},
+    {time:'11:40',type:'note',text:l3('Добавлена заметка','Qeyd əlavə edildi','Note added')},
+    {time:'12:20',type:'photo',text:l3('Загружено 4 фото','4 foto yükləndi','4 photos uploaded'),strong:true}
+  ];
+  const shown=(rows.length?rows.slice(0,4).map(r=>({time:new Date(r.ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}),type:r.type,text:r.text})):fallback);
+  const iconCfg={
+    payment:['ph-wallet','#E8F3E9','#5DA16B'],mat:['ph-package','#EDF3FA','#6C8DA6'],delivery:['ph-package','#EDF3FA','#6C8DA6'],
+    note:['ph-pencil','#FBF3E7','#C8944C'],problem:['ph-warning','#FBECE8','#CC5B4E'],task:['ph-check-circle','#E8F3E9','#5DA16B'],
+    photo:['ph-file','#F0EAF8','#7E5DB5'],worker:['ph-users','#E8F3E9','#5DA16B']
+  };
+  const timeline=shown.map(r=>{
+    const cfg=iconCfg[r.type]||iconCfg.note;
+    return`<div class="gold-event">
+      <div class="gold-event-time">${r.time}</div>
+      <div class="gold-event-dot"></div>
+      <div class="gold-event-icon" style="background:${cfg[1]};color:${cfg[2]}"><i class="ph ${cfg[0]}"></i></div>
+      <div class="gold-event-text" style="${r.strong?'font-weight:800':''}">${r.text}</div>
+    </div>`;
+  }).join('');
+  const allPos=(o.stages||[]).flatMap(s=>s.positions||[]);
+  const matsTotal=allPos.flatMap(p=>p.mats||[]).reduce((a,m)=>a+matTotalSafe(m),0);
+  const laborTotal=allPos.flatMap(p=>p.works||[]).reduce((a,w)=>a+(w.paid||0),0);
+  const payTotal=(o.payments||[]).reduce((a,p)=>a+(p.amount||0),0);
+  const otherTotal=Math.max(0,payTotal-laborTotal);
+  const total=matsTotal+laborTotal+otherTotal;
+  const p1=total>0?Math.round(matsTotal/total*100):65;
+  const p2=total>0?Math.round(laborTotal/total*100):25;
+  const p3=Math.max(0,100-p1-p2);
+  const donut=`conic-gradient(var(--gold) 0 ${p1}%, #6C8DA6 ${p1}% ${p1+p2}%, #88BE7A ${p1+p2}% 100%)`;
+  return`<div class="gold-midgrid">
+    <div>
+      <div class="gold-section-title">${l3('Сегодня','Bu gün','Today')}</div>
+      <div class="gold-timeline">${timeline}</div>
+    </div>
+    <div class="gold-fin-card" onclick="switchTab('finance')">
+      <div class="gold-fin-head"><span>${l3('Финансы','Maliyyə','Finance')}</span><i class="ph ph-dots-three" style="color:#8A8580;font-size:20px"></i></div>
+      <div class="gold-donut" style="background:${donut}"><div class="gold-donut-label"><b>${fmtShort(total||td.todayPaid||300)}</b>${l3('расходы','xərc','expenses')}</div></div>
+      <div class="gold-legend-row"><span class="gold-dot" style="background:var(--gold)"></span>${l3('Материалы','Materiallar','Materials')}<b>${p1}%</b></div>
+      <div class="gold-legend-row"><span class="gold-dot" style="background:#6C8DA6"></span>${l3('Работа','İş','Labor')}<b>${p2}%</b></div>
+      <div class="gold-legend-row"><span class="gold-dot" style="background:#88BE7A"></span>${l3('Прочее','Digər','Other')}<b>${p3}%</b></div>
+    </div>
+  </div>`;
+}
+function goldStagesRailHTML(o){
+  const st=(o.stages||[]).slice(0,5);
+  if(!st.length)return'';
+  return`<div style="margin-bottom:18px">
+    <div class="gold-rail-head">
+      <div class="gold-section-title" style="margin:0">${l3('Этапы','Mərhələlər','Stages')}</div>
+      <button onclick="showStagesPage()">${l3('Смотреть все','Hamısı','View all')} <i class="ph ph-arrow-right" style="font-size:22px"></i></button>
+    </div>
+    <div class="gold-stage-rail">
+      ${st.map((s,i)=>{
+        const done=s.status==='done',active=s.status==='active';
+        const status=done?l3('готов','hazır','done'):active?l3('идёт','gedir','active'):l3('ожидает','gözləyir','waiting');
+        return`<div class="gold-rail-item ${done?'done':active?'active':''}" onclick="goDetail('${s.id}')">
+          <div class="gold-rail-circle">${goldStageIconHTML(s,i,done||active)}</div>
+          <div class="gold-rail-name">${tName(s)||s.name}</div>
+          <div class="gold-rail-status">${status}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
 function toggleQTypePop(e){
   if(e)e.stopPropagation();
   const p=document.getElementById('qtypePop');if(!p)return;
@@ -987,13 +1099,12 @@ function renderDashBottom(){
   const oSt=o.stages||[];
   const el=document.getElementById('dashBottom');if(!el)return;
   el.innerHTML=oSt.length?`
-    ${todayBlockHTML(o)}
-    ${stagesCardHTML(o)}
-
+    ${goldNextStageCardHTML(o)}
+    ${goldTodayFinanceHTML(o)}
+    ${goldStagesRailHTML(o)}
     <div style="height:8px"></div>`:`
     ${startCardHTML(o)}
-    ${todayBlockHTML(o)}
-
+    ${goldTodayFinanceHTML(o)}
     <div style="height:8px"></div>`;
 }
 // ── DETAIL (Stage → Positions) ──
